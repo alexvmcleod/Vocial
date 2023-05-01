@@ -14,7 +14,7 @@ class ChatBot:
 
 
     def querychatgpt(self, initmessage,stat):
-        message = f"You are a helpful social media assistant. A user asks '{initmessage}'. The answer to this question is '{str(stat)}'. Please write a response to that."
+        message = f"You are a helpful social media assistant for an account using Telegram. A user asks '{initmessage}'. The answer to this question is '{str(stat)}'. Please write a response to that and don't worry about missing context, and do not mention that you lack any context. Also try to keep the response in two sentences or under."
         # print(message)
 
         self.messages.append(  {"role": "user", "content": message},)

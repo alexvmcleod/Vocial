@@ -24,7 +24,7 @@ class TelegramAPI:
             for message in client.iter_messages(username,reverse=False):
                 #finds all reaction types and converts it to likes
                 einelist.append(message)
-                print(type(message.date))
+                #print(type(message.date))
             #print(len(einelist))
         return einelist
 

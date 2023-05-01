@@ -95,7 +95,7 @@ class ChatApp(QApplication):
         else:
             response = f"{self.first_question_response}: {message}\n"
             self.chat_widget.add_message(response)
-            responsething = f"Vocial: {self.vocial.main(message,testing=True)}\n"
+            responsething = f"Vocial: {self.vocial.main(message,testing=False)}\n"
             self.chat_widget.add_message(responsething)
 
 

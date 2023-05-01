@@ -1,6 +1,12 @@
 import torch
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 
+import warnings
+from transformers import logging as transformers_logging
+
+warnings.filterwarnings("ignore")
+transformers_logging.set_verbosity(transformers_logging.ERROR)
+
 class LabelModel:
     def __init__(self):
         self.modelpaths = {"time":"models/time.pt","stat":None,"metric":"models/metric.pt"}
@@ -24,17 +30,24 @@ class LabelModel:
             4: 'followers',
         }
 
-        self.label_maps = {
-            "time":self.label_map_metric,
-            "metric":self.label_map_metric,
-        }
-        
-    def generate_labels(self,message):
-        #TODO
-        pass
 
-    def load_model(self,model_path):
-        model = torch.load(model_path)
+        self.label_map_stat = {
+            0: 'top',
+            1: 'average',
+            2: 'median',
+            3: 'bottom',
+        }
+
+        self.label_maps = {
+            "time":self.label_map_time,
+            "metric":self.label_map_metric,
+            "stat":self.label_map_stat,
+        }
+
+    def load_model(self, model_path):
+        model = AutoModelForSequenceClassification.from_pretrained('bert-base-uncased',num_labels=5)
+        state_dict = torch.load(model_path)
+        model.load_state_dict(state_dict)
         model.eval()
         return model
     
@@ -45,12 +58,12 @@ class LabelModel:
         input_tensor = torch.tensor(token_indices).unsqueeze(0)  # Add batch dimension
         return input_tensor
     
-    def perform_inference(model, input_tensor):
+    def perform_inference(self, model, input_tensor):
         with torch.no_grad():
-            output_tensor = model(input_tensor)
-        return output_tensor
+            output = model(input_tensor)
+        return output.logits
 
-    def postprocess_output(output_tensor, label_map):
+    def postprocess_output(self, output_tensor, label_map):
         predicted_index = torch.argmax(output_tensor, dim=1).item()
         predicted_label = label_map[predicted_index]
         return predicted_label
@@ -59,7 +72,7 @@ class LabelModel:
         finallabels = {"time":"NONE","stat":"NONE","metric":"NONE"}
         
         for category in self.modelpaths:
-            print(f"{category} THINF")
+            # print(f"{category} THINF")
             #print(self.modelpaths[category])
 
             if self.modelpaths[category]:
@@ -69,18 +82,13 @@ class LabelModel:
                 output_tensor = self.perform_inference(model, input_tensor)
                 predicted_label = self.postprocess_output(output_tensor, self.label_maps[category])
                 finallabels[category] = predicted_label
-                print(predicted_label)
+            else:
+                #runs if no model availible
+                predicted_label
+                finallabels[category] = self.label_maps[category][0]
+        print(finallabels)
         return finallabels
-
-        # model = self.load_model(model_path)
-
-        # input_string = "Your input string goes here"
-        # max_length = 128  # Adjust this according to your model's requirements
-
-        # input_tensor = preprocess_input(input_string, tokenizer, max_length)
-        # output_tensor = perform_inference(model, input_tensor)
-        # predicted_label = postprocess_output(output_tensor, label_map)
 
 if __name__ == "__main__":
     x = LabelModel()
-    x.main("what post gave the most reactions in the last year")
+    print(x.main("what posts gave the most reactions in the last month"))

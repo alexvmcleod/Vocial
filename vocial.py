@@ -17,13 +17,14 @@ class Vocial:
             response = self.chatgpt.querychatgpt(message,valwewant)
             return response
 
-        modelvals = self.model.generate_labels(message)
-
-        #TODO
-        #figure out how to incorporate output to api scrape
-        valwewant = self.telapi.response_from_labels()
-
+        modelvals = self.model.main(message)
+        valwewant = self.telapi.response_from_labels(modelvals["time"],modelvals["stat"],modelvals["metric"],self.username)
         response = self.chatgpt.querychatgpt(message,valwewant)
 
         return response
 
+if __name__ == "__main__":
+    v = Vocial()
+    v.username = "disclosetv"
+    res = v.main(message="what posts gave the most reactions in the last month",testing=False)
+    print(res)
