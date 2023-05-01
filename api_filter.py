@@ -14,6 +14,7 @@ class TelegramAPI:
 
             self.api_id = keys['api_id']
             self.api_hash = keys['api_hash']
+            self.bot_token = keys['bot_token']
 
     def get_all_messages(self,username):
         einelist = []
